@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -11,6 +12,10 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 )
+
+type contextKey string
+
+const userIDKey contextKey = "user_id"
 
 type Handler struct {
 	svc       service.Service
@@ -57,7 +62,7 @@ func (h Handler) AuthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) InfoHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value("user_id").(int)
+	userID, ok := r.Context().Value(userIDKey).(int)
 	if !ok {
 		respondWithError(w, http.StatusUnauthorized, "Пользователь не найден в контексте")
 		return
@@ -71,7 +76,7 @@ func (h Handler) InfoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) SendCoinHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value("user_id").(int)
+	userID, ok := r.Context().Value(userIDKey).(int)
 	if !ok {
 		respondWithError(w, http.StatusUnauthorized, "Пользователь не найден в контексте")
 		return
@@ -93,7 +98,7 @@ func (h Handler) SendCoinHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h Handler) BuyHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value("user_id").(int)
+	userID, ok := r.Context().Value(userIDKey).(int)
 	if !ok {
 		respondWithError(w, http.StatusUnauthorized, "Пользователь не найден в контексте")
 		return
@@ -140,7 +145,7 @@ func (h Handler) JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 				respondWithError(w, http.StatusUnauthorized, "Неверный идентификатор пользователя в токене")
 				return
 			}
-			ctx := context.WithValue(r.Context(), "user_id", uid)
+			ctx := context.WithValue(r.Context(), userIDKey, uid)
 			next(w, r.WithContext(ctx))
 		} else {
 			respondWithError(w, http.StatusUnauthorized, "Неверные данные токена")
@@ -151,13 +156,17 @@ func (h Handler) JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(ErrorResponse{Errors: message})
+	if err := json.NewEncoder(w).Encode(ErrorResponse{Errors: message}); err != nil {
+		log.Printf("Ошибка при кодировании ErrorResponse: %v", err)
+	}
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(payload)
+	if err := json.NewEncoder(w).Encode(payload); err != nil {
+		log.Printf("Ошибка при кодировании payload: %v", err)
+	}
 }
 
 func stringify(val interface{}) string {

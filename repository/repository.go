@@ -75,7 +75,7 @@ func (r PostgresRepository) UpdateUserCoins(
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	var coins int
 	err = tx.QueryRowContext(
@@ -131,7 +131,7 @@ func (r PostgresRepository) GetUserTransactions(
 	if err != nil {
 		return nil, nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var received []models.Transaction
 	for rows.Next() {
@@ -159,7 +159,7 @@ func (r PostgresRepository) GetUserTransactions(
 	if err != nil {
 		return nil, nil, err
 	}
-	defer rows2.Close()
+	defer func() { _ = rows2.Close() }()
 
 	var sent []models.Transaction
 	for rows2.Next() {
@@ -190,7 +190,7 @@ func (r PostgresRepository) GetUserPurchases(
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var purchases []models.Purchase
 	for rows.Next() {

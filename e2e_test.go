@@ -251,7 +251,7 @@ func TestE2E_BuyMerch(t *testing.T) {
 			require.NoError(t, err)
 			resp, err := client.Post(ts.URL+"/api/auth", "application/json", bytes.NewReader(data))
 			require.NoError(t, err)
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			body, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			var authResp map[string]string
@@ -280,7 +280,7 @@ func TestE2E_BuyMerch(t *testing.T) {
 				req.Header.Set("Authorization", "Bearer "+token)
 				resp, err := client.Do(req)
 				require.NoError(t, err)
-				defer resp.Body.Close()
+				defer func() { _ = resp.Body.Close() }()
 				body, err := io.ReadAll(resp.Body)
 				require.NoError(t, err)
 				var infoResp map[string]interface{}
@@ -301,7 +301,7 @@ func TestE2E_BuyMerch(t *testing.T) {
 				req.Header.Set("Authorization", "Bearer "+token)
 				resp, err := client.Do(req)
 				require.NoError(t, err)
-				defer resp.Body.Close()
+				defer func() { _ = resp.Body.Close() }()
 				body, err := io.ReadAll(resp.Body)
 				require.NoError(t, err)
 				var infoResp map[string]interface{}
@@ -396,7 +396,7 @@ func TestE2E_SendCoin(t *testing.T) {
 			require.NoError(t, err)
 			resp, err := client.Post(ts.URL+"/api/auth", "application/json", bytes.NewReader(data))
 			require.NoError(t, err)
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			body, err := io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			var authResp map[string]string
@@ -421,7 +421,7 @@ func TestE2E_SendCoin(t *testing.T) {
 			require.NoError(t, err)
 			resp, err = client.Post(ts.URL+"/api/auth", "application/json", bytes.NewReader(data))
 			require.NoError(t, err)
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			body, err = io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			require.NoError(t, json.Unmarshal(body, &authResp))
@@ -440,7 +440,7 @@ func TestE2E_SendCoin(t *testing.T) {
 			req.Header.Set("Authorization", "Bearer "+senderToken)
 			resp, err = client.Do(req)
 			require.NoError(t, err)
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			body, err = io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			var transferResp map[string]string
@@ -457,7 +457,7 @@ func TestE2E_SendCoin(t *testing.T) {
 			req.Header.Set("Authorization", "Bearer "+senderToken)
 			resp, err = client.Do(req)
 			require.NoError(t, err)
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			body, err = io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			var senderInfo map[string]interface{}
@@ -470,7 +470,7 @@ func TestE2E_SendCoin(t *testing.T) {
 			req.Header.Set("Authorization", "Bearer "+receiverToken)
 			resp, err = client.Do(req)
 			require.NoError(t, err)
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 			body, err = io.ReadAll(resp.Body)
 			require.NoError(t, err)
 			var receiverInfo map[string]interface{}

@@ -1,0 +1,26 @@
+run:
+  deadline: 2m
+
+issues:
+  exclude-dirs:
+    - vendor
+  exclude-files:
+    - ".*\\.gen\\.go"
+
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gosimple
+    - unused
+    - gocritic
+
+linters-settings:
+  shadow:
+    check-shadowing: true
+  errcheck:
+    check-type-assertions: true
+
+output:
+  formats: colored-line-number

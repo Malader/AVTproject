@@ -21,7 +21,7 @@ func main() {
 	cfg := config.LoadConfigOrPanic()
 
 	db := config.InitDB(ctx, cfg)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	repoImpl := repository.NewPostgresRepository(db)
 
@@ -36,7 +36,9 @@ func main() {
 	r.HandleFunc("/api/buy/{item}", h.JWTMiddleware(h.BuyHandler)).Methods("GET")
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Добро пожаловать в Avito Shop API"))
+		if _, err := w.Write([]byte("Добро пожаловать в Avito Shop API")); err != nil {
+			log.Printf("Ошибка при записи ответа: %v", err)
+		}
 	}).Methods("GET")
 
 	srv := http.Server{
@@ -46,5 +48,8 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 	log.Printf("Сервер запущен на порту %s", cfg.ServerPort)
-	log.Fatal(srv.ListenAndServe())
+	if err := srv.ListenAndServe(); err != nil {
+		_ = db.Close()
+		log.Fatal(err)
+	}
 }
